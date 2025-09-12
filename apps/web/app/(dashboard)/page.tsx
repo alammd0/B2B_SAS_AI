@@ -1,9 +1,9 @@
 "use client"
 
-import { useMutation, useQuery, Authenticated, Unauthenticated} from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "@workspace/backend/_generated/api";
 import { Button } from "@workspace/ui/components/button";
-import { SignInButton, UserButton } from "@clerk/nextjs";
+import { OrganizationSwitcher, UserButton } from "@clerk/nextjs";
 
 export default function Page() {
 
@@ -13,15 +13,14 @@ export default function Page() {
   const addUser = useMutation(api.user.add)
 
   return (
-
-      <>
-        <Authenticated>
-            <div className="flex items-center justify-center min-h-svh">
+        <div className="flex items-center justify-center min-h-svh">
               <div className="flex flex-col items-center justify-center gap-4">
                 <h1>App / Hello </h1>
 
                 <h2>You are logged in!</h2>
                 <UserButton/>
+
+                <OrganizationSwitcher hidePersonal />
 
                 <Button onClick={() => addUser()}>Add User</Button>
                 
@@ -29,14 +28,6 @@ export default function Page() {
                   {JSON.stringify(users, null, 2)}
                 </div>
               </div>
-            </div>
-        </Authenticated>
-
-        <Unauthenticated>
-           <h2>Must be loading!</h2>
-           <SignInButton />
-        </Unauthenticated>
-      </>
-      
+        </div>
   )
 }
