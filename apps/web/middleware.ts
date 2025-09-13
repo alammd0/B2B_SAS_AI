@@ -1,40 +1,40 @@
-import { clerkMiddleware, createRouteMatcher} from '@clerk/nextjs/server'
+import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server';
 
 const isPublicRoute = createRouteMatcher([
-    "/sign-in(.*)",
-    "/sign-up(.*)",
+  "/sign-in(.*)",
+  "/sign-up(.*)",
 ]);
-
 
 const isOrgFreeRoute = createRouteMatcher([
-     "/sign-in(.*)",
-    "/sign-up(.*)",
-    "/org-selection(.*)",
+  "/sign-in(.*)",
+  "/sign-up(.*)",
+  "/org-selection(.*)",
 ]);
 
-export default clerkMiddleware( async (auth, req) => {
+export default clerkMiddleware(async (auth, req) => {
+  const { userId, orgId } = await auth();
 
-    const {userId, orgId} = await auth();
+  if (!isPublicRoute(req)) {
+    await auth.protect();
+  }
 
-    if(!isPublicRoute(req)) {
-        await auth.protect();
-    }
+  if (userId && !orgId && !isOrgFreeRoute(req)) {
+    const searchParams = new URLSearchParams({ redirectUrl: req.url });
+    const redirectUrl = new URL(`/org-selection?${searchParams.toString()}`, req.nextUrl.origin);
 
-    if(userId && !orgId && !isOrgFreeRoute(req)) {
-        const searchParams = new URLSearchParams({redirectURL: req.url});
+    return NextResponse.redirect(redirectUrl);
+  }
 
-        const redirectUrl = new URL(`/org-selection?${searchParams.toString()}`, req.url);
-
-        return NextResponse.redirect(redirectUrl);
-    }
-})
+  return NextResponse.next();
+});
 
 export const config = {
   matcher: [
     // Skip Next.js internals and all static files, unless found in search params
-    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
+    '/((?!_next|[^?]*\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
     // Always run for API routes
     '/(api|trpc)(.*)',
   ],
-}
+};
+

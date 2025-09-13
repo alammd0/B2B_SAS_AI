@@ -6,10 +6,7 @@ import { Button } from "@workspace/ui/components/button";
 import { OrganizationSwitcher, UserButton } from "@clerk/nextjs";
 
 export default function Page() {
-
   const users = useQuery(api.user.getMany);
-  // console.log(users);
-
   const addUser = useMutation(api.user.add)
 
   return (
